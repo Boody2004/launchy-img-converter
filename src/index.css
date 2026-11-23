@@ -24,6 +24,16 @@
 
   --animate-float: float 16s ease-in-out infinite;
   --animate-float-slow: float 22s ease-in-out infinite reverse;
+  --animate-marquee: marquee 28s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
 
   @keyframes float {
     0%,
