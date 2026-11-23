@@ -1,0 +1,28 @@
+{
+  "seo": {
+    "title": "Launchy Image Converter | Convert Images to WebP and AVIF",
+    "description": "Launchy Image Converter turns JPG, PNG and HEIC photos into fast WebP and AVIF files right in your browser. Free, private and no upload needed.",
+    "domain": "https://launchy-img-converter.vercel.app",
+    "siteName": "Launchy Image Converter",
+    "image": "/og.jpg",
+    "locale": "en_US"
+  },
+  "imageAlt": "Launchy Image Converter, a free tool to convert images to WebP and AVIF",
+  "themeColor": "#0f172a",
+  "skipLink": "Skip to content",
+  "header": {
+    "brand": "Launchy Image Converter"
+  },
+  "home": {
+    "title": "Convert your images in seconds",
+    "intro": "Turn JPG, PNG and HEIC photos into fast WebP and AVIF files right in your browser."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you are looking for does not exist or has moved.",
+    "homeLink": "Back to the home page"
+  },
+  "footer": {
+    "text": "© 2026 Launchy. All rights reserved."
+  }
+}
