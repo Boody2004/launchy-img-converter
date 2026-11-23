@@ -310,6 +310,114 @@ async function pageChecks(profile, path) {
   }
 }
 
+async function converterChecks(profile) {
+  const tag = `${profile.name} converter`;
+  const { browser, page } = await open(profile);
+  try {
+    const problems = [];
+    page.on("pageerror", (error) => problems.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") problems.push(message.text());
+    });
+    page.setDefaultTimeout(30000);
+    await page.goto(base + "/", { waitUntil: "networkidle" });
+
+    const png = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 300;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, 400, 300);
+      context.fillStyle = "#1a8cff";
+      context.fillRect(40, 40, 200, 140);
+      context.fillStyle = "#0b0f17";
+      context.beginPath();
+      context.arc(280, 190, 70, 0, Math.PI * 2);
+      context.fill();
+      return canvas.toDataURL("image/png").split(",")[1];
+    });
+
+    await page.locator('[data-testid="file-input"]').setInputFiles({
+      name: "Test Photo.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(png, "base64"),
+    });
+    const item = page.locator('[data-testid="file-item"]').first();
+    await item.locator('[data-testid="html-snippet"]').waitFor();
+    check(
+      (await item.getAttribute("data-status")) === "done",
+      `${tag}: an uploaded PNG is converted`,
+    );
+
+    const alt = "Launchy team at the office";
+    await item.locator('[data-testid="alt-input"]').fill(alt);
+    const snippet = await item
+      .locator('[data-testid="html-snippet"]')
+      .innerText();
+    check(
+      snippet.includes('src="launchy-team-at-the-office.webp"') &&
+        snippet.includes(`alt="${alt}"`) &&
+        snippet.includes('width="400"') &&
+        snippet.includes('height="300"'),
+      `${tag}: alt text sets the file name and the HTML snippet`,
+      snippet,
+    );
+
+    const save = async (locator) => {
+      const [download] = await Promise.all([
+        page.waitForEvent("download"),
+        locator.click(),
+      ]);
+      return {
+        name: download.suggestedFilename(),
+        bytes: readFileSync(await download.path()),
+      };
+    };
+
+    const webp = await save(item.getByRole("button", { name: "Download" }));
+    check(
+      webp.name === "launchy-team-at-the-office.webp" &&
+        webp.bytes.subarray(0, 4).toString() === "RIFF" &&
+        webp.bytes.subarray(8, 12).toString() === "WEBP",
+      `${tag}: the download is a real WebP file with the SEO file name`,
+      `${webp.name} ${webp.bytes.subarray(0, 12).toString("hex")}`,
+    );
+
+    await page.locator('label:has([data-testid="format-svg"])').click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector('[data-testid="html-snippet"]')
+        ?.textContent.includes('.svg"'),
+    );
+    const svg = await save(item.getByRole("button", { name: "Download" }));
+    const svgText = svg.bytes.toString("utf8");
+    check(
+      svg.name === "launchy-team-at-the-office.svg" &&
+        svgText.startsWith("<svg") &&
+        svgText.includes("<path") &&
+        svgText.includes(`<title>${alt}</title>`),
+      `${tag}: switching to SVG gives a traced vector with the alt text as its title`,
+      `${svg.name} ${svgText.slice(0, 120)}`,
+    );
+
+    const zip = await save(page.locator('[data-testid="download-all"]'));
+    check(
+      zip.name.endsWith(".zip") && zip.bytes.subarray(0, 2).toString() === "PK",
+      `${tag}: download all gives a ZIP file`,
+      zip.name,
+    );
+
+    check(
+      problems.length === 0,
+      `${tag}: no errors in the console while converting`,
+      problems.slice(0, 3).join(" | "),
+    );
+  } finally {
+    await browser.close();
+  }
+}
+
 async function notFoundCheck() {
   const { browser, page } = await open(PROFILES[0]);
   try {
@@ -359,6 +467,7 @@ async function main() {
     for (const path of PAGES) {
       await section(`${profile.name} ${path}`, () => pageChecks(profile, path));
     }
+    await section(`${profile.name} converter`, () => converterChecks(profile));
   }
 
   await section("not found page", notFoundCheck);

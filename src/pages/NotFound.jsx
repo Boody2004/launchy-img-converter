@@ -12,14 +12,14 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div>
+    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
       <h1 className="text-4xl font-bold tracking-tight">
         {site.notFound.title}
       </h1>
-      <p className="mt-4 text-lg text-slate-700">{site.notFound.text}</p>
+      <p className="mt-4 text-lg text-ink-300">{site.notFound.text}</p>
       <Link
         to="/"
-        className="mt-6 inline-flex min-h-11 items-center font-semibold text-blue-700 underline"
+        className="mt-6 inline-flex min-h-11 items-center font-semibold text-brand-400 underline"
       >
         {site.notFound.homeLink}
       </Link>

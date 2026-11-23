@@ -1,28 +1,87 @@
 {
   "seo": {
-    "title": "Launchy Image Converter | Convert Images to WebP and AVIF",
-    "description": "Launchy Image Converter turns JPG, PNG and HEIC photos into fast WebP and AVIF files right in your browser. Free, private and no upload needed.",
+    "title": "Launchy Image Converter | Convert Images to WebP or SVG",
+    "description": "Convert JPG, PNG, HEIC and more to fast WebP images or SVG vectors right in your browser. Add SEO alt text and file names, then copy ready-made HTML.",
     "domain": "https://launchy-img-converter.vercel.app",
     "siteName": "Launchy Image Converter",
     "image": "/og.jpg",
     "locale": "en_US"
   },
-  "imageAlt": "Launchy Image Converter, a free tool to convert images to WebP and AVIF",
-  "themeColor": "#0f172a",
+  "imageAlt": "Launchy Image Converter, a tool to convert images to WebP or SVG",
+  "themeColor": "#0b0f17",
   "skipLink": "Skip to content",
   "header": {
-    "brand": "Launchy Image Converter"
+    "brand": "Launchy",
+    "product": "Image Converter",
+    "homeLabel": "Launchy Image Converter home",
+    "badge": "Private: files stay on your device"
   },
   "home": {
-    "title": "Convert your images in seconds",
-    "intro": "Turn JPG, PNG and HEIC photos into fast WebP and AVIF files right in your browser."
+    "title": "Image Converter",
+    "intro": "Turn JPG, PNG, HEIC and other images into fast WebP files, or trace logos into SVG vectors. Add alt text and SEO-friendly file names, then copy ready-made HTML. Everything runs in your browser, so your images are never uploaded.",
+    "visual": {
+      "from": "Any",
+      "to": "To"
+    }
+  },
+  "converter": {
+    "dropTitle": "Select your images to convert",
+    "dropText": "or drop or paste them here.",
+    "selectButton": "Select images",
+    "dropActive": "Drop to add your images",
+    "settingsTitle": "Conversion settings",
+    "formatLabel": "Convert to",
+    "formats": {
+      "webp": {
+        "label": "WebP",
+        "hint": "Recommended for websites. Small files with great quality."
+      },
+      "svg": {
+        "label": "SVG",
+        "hint": "Traces the image into vector shapes. Best for logos and icons; photos make large files."
+      }
+    },
+    "qualityLabel": "Quality",
+    "colorsLabel": "Colors",
+    "listTitle": "Your images",
+    "count": "{n} images",
+    "countOne": "1 image",
+    "downloadAll": "Download all (.zip)",
+    "zipping": "Preparing ZIP…",
+    "clearAll": "Clear all",
+    "zipName": "launchy-images.zip"
+  },
+  "item": {
+    "queued": "Waiting…",
+    "converting": "Converting…",
+    "saved": "{percent}% smaller",
+    "bigger": "{percent}% larger",
+    "altLabel": "Alt text",
+    "altPlaceholder": "Describe what the image shows",
+    "altHint": "Describe the image for Google and screen readers. Keep it under {max} characters.",
+    "altCount": "{n}/{max}",
+    "nameLabel": "File name",
+    "download": "Download",
+    "copyHtml": "Copy HTML",
+    "copied": "Copied",
+    "copiedAnnounce": "HTML for {name} copied to the clipboard",
+    "remove": "Remove {name}",
+    "errorDecode": "This file could not be read. Try a JPG, PNG, WebP or HEIC image.",
+    "errorConvert": "The conversion failed. Try again or use another image."
+  },
+  "formats": {
+    "eyebrow": "Supported formats",
+    "title": "Upload almost any image",
+    "text": "Drop in any of these formats and get a WebP or SVG file back.",
+    "list": ["JPG", "JPEG", "PNG", "WEBP", "AVIF", "HEIC", "HEIF", "GIF", "BMP", "SVG", "ICO"]
   },
   "notFound": {
     "title": "Page not found",
     "text": "The page you are looking for does not exist or has moved.",
-    "homeLink": "Back to the home page"
+    "homeLink": "Back to the converter"
   },
   "footer": {
-    "text": "© 2026 Launchy. All rights reserved."
+    "text": "© 2026 Launchy. Internal tool.",
+    "note": "Images are converted in your browser and never uploaded."
   }
 }

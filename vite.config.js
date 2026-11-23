@@ -5,4 +5,10 @@ import seoPlugin from "./plugins/seo.js";
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), seoPlugin()],
+  optimizeDeps: {
+    exclude: ["@jsquash/webp"],
+  },
+  worker: {
+    format: "es",
+  },
 });

@@ -1,7 +1,7 @@
 # Launchy Image Converter
 
-> A free tool that turns JPG, PNG and HEIC photos into fast WebP and AVIF files right in your browser.
+> Launchy's in-browser image converter. It turns JPG, PNG, HEIC and other images into WebP files, or traces logos into SVG vectors, with SEO alt text, clean file names and ready-made HTML. Images never leave the browser.
 
 ## Pages
 
-- [Home](https://launchy-img-converter.vercel.app/): Convert your images in seconds.
+- [Home](https://launchy-img-converter.vercel.app/): Upload images, pick WebP or SVG, set quality, add alt text, then download each file or all of them as a ZIP.

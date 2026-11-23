@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0f172a"/>
-  <path d="M20 16v26a6 6 0 0 0 6 6h18" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+  <defs>
+    <linearGradient id="a" x1="0" y1="34" x2="0" y2="56.75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a4fb8" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0a4fb8" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="43" x2="0" y2="20.25" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a4fb8" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0a4fb8" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(50 -4.5) rotate(45)" fill="#1a8cff">
+    <path d="M0 8.3H20.25V56.75H68.7V77H15A15 15 0 0 1 0 62Z"/>
+    <path d="M77 68.7H56.75V20.25H8.3V0H62A15 15 0 0 1 77 15Z"/>
+    <rect x="0" y="34" width="20.25" height="22.75" fill="url(#a)"/>
+    <rect x="56.75" y="20.25" width="20.25" height="22.75" fill="url(#b)"/>
+  </g>
 </svg>
