@@ -5,7 +5,8 @@ import { useConverter } from "../hooks/useConverter.js";
 import { outputBlob, saveBlob, zipBlob } from "../lib/save.js";
 import { baseName, fill, slugify } from "../lib/text.js";
 import FileItem from "./FileItem.jsx";
-import { FilePlusIcon, Spinner, UploadCloudIcon } from "./Icons.jsx";
+import Blob from "./Blob.jsx";
+import { FilePlusIcon, Spinner } from "./Icons.jsx";
 
 const t = site.converter;
 const IMAGE_EXTENSIONS = /\.(heic|heif|avif|jfif|webp|svg|ico|bmp)$/i;
@@ -43,16 +44,16 @@ function Settings({ settings, onChange }) {
     : { key: "quality", label: t.qualityLabel, min: 10, max: 100, step: 5, suffix: "%" };
 
   return (
-    <div className="grid gap-6 border-t border-ink-700 px-5 py-5 sm:grid-cols-2 sm:px-8">
+    <div className="grid gap-6 border-t border-white/10 px-6 py-6 sm:grid-cols-2 sm:px-10">
       <fieldset>
         <legend className="text-sm font-medium text-ink-200">
           {t.formatLabel}
         </legend>
-        <div className="mt-2 grid grid-cols-2 gap-1 rounded-lg border border-ink-700 bg-ink-900 p-1">
+        <div className="mt-2 grid grid-cols-2 gap-1 rounded-full border border-white/10 bg-black/40 p-1">
           {Object.entries(t.formats).map(([value, format]) => (
             <label
               key={value}
-              className="relative flex min-h-11 cursor-pointer items-center justify-center rounded-md text-sm font-semibold text-ink-300 transition-colors has-checked:bg-brand-600 has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-brand-400"
+              className="relative flex min-h-11 cursor-pointer items-center justify-center rounded-full text-sm font-semibold text-ink-300 transition-colors hover:text-white has-checked:bg-white has-checked:text-black has-focus-visible:outline-3 has-focus-visible:outline-brand-400"
             >
               <input
                 type="radio"
@@ -197,20 +198,24 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
   return (
     <>
       <section
-        aria-label={t.dropTitle}
-        className="mx-auto mt-10 max-w-4xl px-4 sm:mt-12 sm:px-6"
+        id="converter"
+        aria-labelledby={`${inputId}-title`}
+        className="relative mx-auto max-w-4xl px-4 pt-10 sm:px-6 sm:pt-16"
       >
+        <Blob className="left-1/2 top-0 h-[520px] w-[min(640px,120vw)] -translate-x-1/2 motion-safe:animate-float-slow sm:h-[620px]" />
         <div
-          className={`overflow-hidden rounded-2xl border bg-ink-850/95 shadow-2xl shadow-black/50 backdrop-blur transition-colors ${dragging ? "border-brand-400" : "border-ink-700"}`}
+          className={`glass relative overflow-hidden rounded-[32px] shadow-2xl shadow-black/60 transition-colors ${dragging ? "border-brand-400!" : ""}`}
         >
           <div
-            className={`relative m-3 flex flex-col items-center rounded-xl border-2 border-dashed px-5 py-10 text-center transition-colors sm:py-12 ${dragging ? "border-brand-400 bg-brand-500/10" : "border-transparent"}`}
+            className={`relative m-3 flex flex-col items-center rounded-[24px] border-2 border-dashed px-5 py-12 text-center transition-colors sm:py-16 ${dragging ? "border-brand-400/80 bg-brand-500/10" : "border-transparent"}`}
           >
-            <UploadCloudIcon className="size-14 text-brand-500" />
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight">
+            <h1
+              id={`${inputId}-title`}
+              className="font-display text-4xl font-normal tracking-tight sm:text-5xl"
+            >
               {dragging ? t.dropActive : t.dropTitle}
-            </h2>
-            <p className="mt-1.5 text-ink-300">{t.dropText}</p>
+            </h1>
+            <p className="mt-3 max-w-md text-ink-300">{t.dropText}</p>
             <input
               id={inputId}
               type="file"
@@ -225,7 +230,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
             />
             <label
               htmlFor={inputId}
-              className="mt-6 inline-flex min-h-12 cursor-pointer items-center gap-2.5 rounded-lg bg-brand-600 px-6 text-lg font-semibold text-white shadow-lg shadow-brand-600/25 transition-colors hover:bg-brand-700 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-400"
+              className="mt-8 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-brand-600 px-7 font-semibold text-white shadow-[0_0_32px_-6px_rgb(26_140_255/0.7)] transition-colors hover:bg-brand-700 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-400"
             >
               <FilePlusIcon className="size-5" />
               {t.selectButton}
@@ -238,10 +243,13 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
       {items.length > 0 && (
         <section
           aria-labelledby={`${inputId}-list`}
-          className="mx-auto mt-10 max-w-4xl px-4 sm:px-6"
+          className="relative mx-auto mt-12 max-w-4xl px-4 sm:px-6"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id={`${inputId}-list`} className="text-xl font-semibold">
+            <h2
+              id={`${inputId}-list`}
+              className="font-display text-3xl font-normal tracking-tight"
+            >
               {t.listTitle}{" "}
               <span className="text-base font-normal text-ink-300">
                 ({items.length === 1 ? t.countOne : fill(t.count, { n: items.length })})
@@ -252,7 +260,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
                 type="button"
                 onClick={downloadAll}
                 disabled={!ready.length || zipping}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black transition-colors hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
                 data-testid="download-all"
               >
                 {zipping && <Spinner className="size-4" />}
@@ -261,7 +269,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
               <button
                 type="button"
                 onClick={clearAll}
-                className="inline-flex min-h-11 items-center rounded-lg border border-ink-700 px-4 text-sm font-semibold text-ink-200 transition-colors hover:border-ink-600 hover:bg-ink-800"
+                className="inline-flex min-h-11 items-center rounded-full border border-white/15 px-5 text-sm font-semibold text-ink-200 transition-colors hover:bg-white/5 hover:text-white"
               >
                 {t.clearAll}
               </button>

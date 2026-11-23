@@ -14,54 +14,10 @@ const Icon = ({ className, children, strokeWidth = 2 }) => (
   </svg>
 );
 
-export const UploadCloudIcon = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  >
-    <path
-      fill="currentColor"
-      d="M7 19a5 5 0 0 1-.9-9.92 6.5 6.5 0 0 1 12.48 1.4A4.25 4.25 0 0 1 17.75 19Z"
-    />
-    <path
-      d="M12 16v-6m-2.75 2.5L12 9.75l2.75 2.75"
-      fill="none"
-      stroke="#0b0f17"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-export const FileIcon = ({ className }) => (
-  <svg
-    viewBox="0 0 24 24"
-    className={className}
-    aria-hidden="true"
-    focusable="false"
-  >
-    <path
-      fill="currentColor"
-      d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"
-    />
-    <path fill="rgb(0 0 0 / 0.25)" d="M14 2v4a2 2 0 0 0 2 2h4Z" />
-  </svg>
-);
-
 export const FilePlusIcon = ({ className }) => (
   <Icon className={className}>
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
     <path d="M14 3v5h5M12 11v6M9 14h6" />
-  </Icon>
-);
-
-export const ArrowsIcon = ({ className }) => (
-  <Icon className={className}>
-    <path d="M20 11a8 8 0 0 0-14.9-3.5M4 4v4h4" />
-    <path d="M4 13a8 8 0 0 0 14.9 3.5M20 20v-4h-4" />
   </Icon>
 );
 
@@ -87,13 +43,6 @@ export const CheckIcon = ({ className }) => (
 export const CloseIcon = ({ className }) => (
   <Icon className={className}>
     <path d="M6 6l12 12M18 6 6 18" />
-  </Icon>
-);
-
-export const LayersIcon = ({ className }) => (
-  <Icon className={className}>
-    <path d="m12 3 9 5-9 5-9-5Z" />
-    <path d="m3 13 9 5 9-5" />
   </Icon>
 );
 

@@ -20,10 +20,10 @@ function useBlobSource(blob) {
 }
 
 const field =
-  "min-h-11 w-full rounded-lg border border-ink-700 bg-ink-900 px-3 text-[15px] text-white placeholder:text-ink-300/70 focus:border-brand-400 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-brand-400/50";
+  "min-h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-[15px] text-white placeholder:text-ink-300/70 focus:border-brand-400 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-brand-400/40";
 
 const button =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
 function FileItem({
   item,
@@ -87,12 +87,12 @@ function FileItem({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.25 }}
-      className="rounded-xl border border-ink-700 bg-ink-850 p-4 sm:p-5"
+      className="glass rounded-3xl p-4 sm:p-6"
       data-testid="file-item"
       data-status={status}
     >
       <div className="grid gap-4 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-5">
-        <div className="bg-checker relative flex size-28 items-center justify-center overflow-hidden rounded-lg border border-ink-700">
+        <div className="bg-checker relative flex size-28 items-center justify-center overflow-hidden rounded-2xl border border-white/10">
           {result && (
             <img
               ref={previewRef}
@@ -123,7 +123,7 @@ function FileItem({
                       {formatBytes(result.size)}
                     </span>
                     {` · ${result.width}×${result.height} · `}
-                    <span className={change >= 0 ? "text-emerald-400" : "text-amber-300"}>
+                    <span className={change >= 0 ? "text-brand-300" : "text-ink-300"}>
                       {change >= 0
                         ? fill(t.saved, { percent: change })
                         : fill(t.bigger, { percent: -change })}
@@ -135,7 +135,7 @@ function FileItem({
                 <p className="mt-1 text-sm text-brand-300">{statusText}</p>
               )}
               {status === "error" && (
-                <p className="mt-1 text-sm text-red-300">
+                <p role="alert" className="mt-1 text-sm font-medium text-brand-100">
                   {item.error === "decode" ? t.errorDecode : t.errorConvert}
                 </p>
               )}
@@ -144,7 +144,7 @@ function FileItem({
               type="button"
               onClick={() => onRemove(item.id)}
               aria-label={fill(t.remove, { name: file.name })}
-              className="-mr-2 -mt-2 inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-ink-300 transition-colors hover:bg-ink-800 hover:text-white"
+              className="-mr-2 -mt-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <CloseIcon className="size-5" />
             </button>
@@ -162,7 +162,7 @@ function FileItem({
                       {t.altLabel}
                     </label>
                     <span
-                      className={`text-xs tabular-nums ${alt.length > ALT_MAX ? "text-amber-300" : "text-ink-300"}`}
+                      className={`text-xs tabular-nums ${alt.length > ALT_MAX ? "font-semibold text-brand-300" : "text-ink-300"}`}
                     >
                       {fill(t.altCount, { n: alt.length, max: ALT_MAX })}
                     </span>
@@ -202,7 +202,7 @@ function FileItem({
                       className={`${field} rounded-r-none`}
                       data-testid="name-input"
                     />
-                    <span className="inline-flex min-h-11 items-center rounded-r-lg border border-l-0 border-ink-700 bg-ink-800 px-3 font-mono text-sm text-ink-300">
+                    <span className="inline-flex min-h-11 items-center rounded-r-xl border border-l-0 border-white/10 bg-white/5 px-3 font-mono text-sm text-ink-300">
                       {extension}
                     </span>
                   </div>
@@ -211,7 +211,7 @@ function FileItem({
 
               {result && (
                 <pre
-                  className="mt-4 whitespace-pre-wrap break-all rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 font-mono text-xs leading-relaxed text-brand-300"
+                  className="mt-4 whitespace-pre-wrap break-all rounded-xl border border-white/10 bg-black/60 px-3 py-2.5 font-mono text-xs leading-relaxed text-brand-200"
                   data-testid="html-snippet"
                 >
                   {snippet}
@@ -232,10 +232,10 @@ function FileItem({
                   type="button"
                   disabled={!result}
                   onClick={copy}
-                  className={`${button} border border-ink-700 text-ink-200 hover:border-ink-600 hover:bg-ink-800`}
+                  className={`${button} border border-white/15 text-ink-200 hover:bg-white/5 hover:text-white`}
                 >
                   {copied ? (
-                    <CheckIcon className="size-4 text-emerald-400" />
+                    <CheckIcon className="size-4 text-brand-300" />
                   ) : (
                     <CopyIcon className="size-4" />
                   )}

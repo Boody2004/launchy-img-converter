@@ -8,28 +8,17 @@
     "locale": "en_US"
   },
   "imageAlt": "Launchy Image Converter, a tool to convert images to WebP or SVG",
-  "themeColor": "#0b0f17",
+  "themeColor": "#000000",
   "skipLink": "Skip to content",
   "header": {
-    "brand": "Launchy",
-    "product": "Image Converter",
-    "homeLabel": "Launchy Image Converter home",
-    "badge": "Private: files stay on your device"
-  },
-  "home": {
-    "title": "Image Converter",
-    "intro": "Turn JPG, PNG, HEIC and other images into fast WebP files, or trace logos into SVG vectors. Add alt text and SEO-friendly file names, then copy ready-made HTML. Everything runs in your browser, so your images are never uploaded.",
-    "visual": {
-      "from": "Any",
-      "to": "To"
-    }
+    "brand": "launchy",
+    "homeLabel": "Launchy Image Converter home"
   },
   "converter": {
-    "dropTitle": "Select your images to convert",
-    "dropText": "or drop or paste them here.",
+    "dropTitle": "Drop your images here",
+    "dropText": "Select, drop or paste your images. They are converted on your device and never uploaded.",
     "selectButton": "Select images",
-    "dropActive": "Drop to add your images",
-    "settingsTitle": "Conversion settings",
+    "dropActive": "Release to add your images",
     "formatLabel": "Convert to",
     "formats": {
       "webp": {
@@ -58,7 +47,7 @@
     "bigger": "{percent}% larger",
     "altLabel": "Alt text",
     "altPlaceholder": "Describe what the image shows",
-    "altHint": "Describe the image for Google and screen readers. Keep it under {max} characters.",
+    "altHint": "Helps Google and screen readers. Aim for under {max} characters.",
     "altCount": "{n}/{max}",
     "nameLabel": "File name",
     "download": "Download",
@@ -70,10 +59,20 @@
     "errorConvert": "The conversion failed. Try again or use another image."
   },
   "formats": {
-    "eyebrow": "Supported formats",
-    "title": "Upload almost any image",
-    "text": "Drop in any of these formats and get a WebP or SVG file back.",
-    "list": ["JPG", "JPEG", "PNG", "WEBP", "AVIF", "HEIC", "HEIF", "GIF", "BMP", "SVG", "ICO"]
+    "title": "Supported formats",
+    "list": [
+      "JPG",
+      "JPEG",
+      "PNG",
+      "WEBP",
+      "AVIF",
+      "HEIC",
+      "HEIF",
+      "GIF",
+      "BMP",
+      "SVG",
+      "ICO"
+    ]
   },
   "notFound": {
     "title": "Page not found",
