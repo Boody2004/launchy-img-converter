@@ -29,9 +29,9 @@ export function usePdfImport(addFiles) {
           setProgress({ name: file.name });
           await readPdf(file, {
             signal,
-            onPage: (image, page, total) => {
+            onPage: (image, page, total, vector) => {
               if (signal.aborted) return;
-              if (image) addFiles([image], { fromPdf: true });
+              if (image) addFiles([image], { fromPdf: true, vector });
               else setProgress({ name: file.name, page, total });
             },
           });
@@ -52,7 +52,13 @@ export function usePdfImport(addFiles) {
     [addFiles],
   );
 
-  useEffect(() => () => controller.current.abort(), []);
+  useEffect(() => {
+    // StrictMode runs the cleanup once right after mounting.
+    if (controller.current.signal.aborted) {
+      controller.current = new AbortController();
+    }
+    return () => controller.current.abort();
+  }, []);
 
   return { importPdf, cancel, progress, errors };
 }

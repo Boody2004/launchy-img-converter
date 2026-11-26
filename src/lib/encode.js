@@ -123,11 +123,17 @@ export async function traceSvg(
   }
 }
 
-export function svgDocument({ body, width, height, title }) {
+export function svgDocument({
+  body,
+  width,
+  height,
+  title,
+  viewBox = `0 0 ${width} ${height}`,
+}) {
   const safeTitle = title
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
   const titleTag = safeTitle ? `<title>${safeTitle}</title>` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img">${titleTag}${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${width}" height="${height}" role="img">${titleTag}${body}</svg>`;
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { decodeImage } from "../lib/decode.js";
 import { toWebp, traceSvg } from "../lib/encode.js";
+import { buildVector } from "../lib/pdf-vector.js";
 
 let nextId = 1;
 const REMOVED = "removed";
@@ -10,10 +11,12 @@ const requeue = (item) =>
     ? item
     : { ...item, status: "queued", job: item.job + 1 };
 
-async function convert(image, settings, signal) {
+async function convert(image, vector, settings, signal) {
   if (settings.format === "svg") {
-    const traced = await traceSvg(image, settings, signal);
-    return { format: "svg", ...traced, size: new Blob([traced.body]).size };
+    const svg = vector
+      ? { ...buildVector(vector, settings), source: "vector" }
+      : { ...(await traceSvg(image, settings, signal)), source: "trace" };
+    return { format: "svg", ...svg, size: new Blob([svg.body]).size };
   }
   const encoded = await toWebp(image, settings);
   return { format: "webp", ...encoded, size: encoded.blob.size };
@@ -43,11 +46,12 @@ export function useConverter(settings) {
       list.map((item) => (item.id === id ? change(item) : item)),
     );
 
-  const addFiles = useCallback((files, { fromPdf = false } = {}) => {
+  const addFiles = useCallback((files, { fromPdf = false, vector = null } = {}) => {
     const added = [...files].map((file) => ({
       id: nextId++,
       file,
       fromPdf,
+      vector,
       status: "queued",
       job: 0,
       alt: "",
@@ -92,7 +96,7 @@ export function useConverter(settings) {
     const next = items.find((item) => item.status === "queued");
     if (!next) return;
 
-    const { id, job, file, fromPdf } = next;
+    const { id, job, file, fromPdf, vector } = next;
     const controller = new AbortController();
     const { signal } = controller;
     running.current = { id, job, controller };
@@ -117,7 +121,7 @@ export function useConverter(settings) {
 
       try {
         if (signal.aborted) return;
-        const result = await convert(image, settings, signal);
+        const result = await convert(image, vector, settings, signal);
         update(id, (item) =>
           isCurrent(item)
             ? { ...item, status: "done", result, error: null }

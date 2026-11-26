@@ -139,6 +139,11 @@ function FileItem({
               {!busy && result?.background === "kept" && (
                 <p className="mt-1 text-sm text-brand-300">{t.backgroundKept}</p>
               )}
+              {!busy && item.fromPdf && result?.format === "svg" && (
+                <p className="mt-1 text-sm text-brand-300" data-testid="svg-source" data-source={result.source}>
+                  {result.source === "vector" ? t.vectorCopied : t.vectorTraced}
+                </p>
+              )}
               {statusText && (
                 <p className="mt-1 text-sm text-brand-300">{statusText}</p>
               )}

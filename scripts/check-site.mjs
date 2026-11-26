@@ -310,14 +310,18 @@ async function pageChecks(profile, path) {
   }
 }
 
-function samplePdf(pageCount) {
+function samplePdf(pageCount, drawing = "") {
   const kids = Array.from({ length: pageCount }, (_, i) => `${i + 3} 0 R`);
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pageCount} >>`,
     ...kids.map(
-      () => "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] >>",
+      () =>
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540]${drawing && ` /Contents ${pageCount + 3} 0 R`} >>`,
     ),
+    ...(drawing
+      ? [`<< /Length ${drawing.length} >>\nstream\n${drawing}\nendstream`]
+      : []),
   ];
 
   let text = "%PDF-1.7\n";
@@ -471,6 +475,42 @@ async function converterChecks(profile) {
       `${tag}: one name for all images numbers each file`,
       named.join(" | "),
     );
+
+    const pdfSvg = async (name, drawing) => {
+      await page.getByRole("button", { name: "Clear all" }).click();
+      await page.locator('[data-testid="file-input"]').setInputFiles({
+        name,
+        mimeType: "application/pdf",
+        buffer: samplePdf(1, drawing),
+      });
+      await item.locator('[data-testid="svg-source"]').waitFor();
+      await item.and(page.locator('[data-status="done"]')).waitFor();
+      const file = await save(item.getByRole("button", { name: "Download" }));
+      return {
+        source: await item
+          .locator('[data-testid="svg-source"]')
+          .getAttribute("data-source"),
+        text: file.bytes.toString("utf8"),
+      };
+    };
+    await page.locator('label:has([data-testid="format-svg"])').click();
+
+    const copied = await pdfSvg("Logo.pdf", "1 0 0 rg 100 100 200 100 re f");
+    check(
+      copied.source === "vector" &&
+        copied.text.includes('fill="#ff0000"') &&
+        copied.text.includes('width="400" height="200"'),
+      `${tag}: a vector PDF keeps its own shapes, cropped to the artwork`,
+      `${copied.source} ${copied.text.slice(0, 200)}`,
+    );
+
+    const traced = await pdfSvg("Blank.pdf", "");
+    check(
+      traced.source === "trace" && traced.text.startsWith("<svg"),
+      `${tag}: a PDF page that can't be copied as vectors is traced and says so`,
+      `${traced.source} ${traced.text.slice(0, 200)}`,
+    );
+    await page.locator('label:has([data-testid="format-webp"])').click();
 
     await page.getByRole("button", { name: "Clear all" }).click();
     await page.locator('[data-testid="transparent"]').check();

@@ -27,7 +27,7 @@
       },
       "svg": {
         "label": "SVG",
-        "hint": "Traces the image into vector shapes. Best for logos and icons; photos make large files."
+        "hint": "Vector PDF pages keep their own shapes. Other files are traced, using the Colors setting: best for logos and icons."
       }
     },
     "qualityLabel": "Quality",
@@ -54,6 +54,8 @@
   "item": {
     "fromPdf": "From PDF",
     "backgroundKept": "No solid background found, so it was kept.",
+    "vectorCopied": "Original vector shapes from the PDF. Check the colors against the brand: print (CMYK) colors can shift on screen.",
+    "vectorTraced": "This page has content that can't be copied as vectors, so it was traced. Compare it with the original.",
     "queued": "Waiting…",
     "converting": "Converting…",
     "saved": "{percent}% smaller",
