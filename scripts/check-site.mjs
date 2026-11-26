@@ -310,6 +310,31 @@ async function pageChecks(profile, path) {
   }
 }
 
+function samplePdf(pageCount) {
+  const kids = Array.from({ length: pageCount }, (_, i) => `${i + 3} 0 R`);
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pageCount} >>`,
+    ...kids.map(
+      () => "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] >>",
+    ),
+  ];
+
+  let text = "%PDF-1.7\n";
+  const offsets = objects.map((object, i) => {
+    const offset = text.length;
+    text += `${i + 1} 0 obj\n${object}\nendobj\n`;
+    return offset;
+  });
+  const xref = text.length;
+  const entries = offsets
+    .map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`)
+    .join("");
+  text += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${entries}`;
+  text += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Buffer.from(text);
+}
+
 async function converterChecks(profile) {
   const tag = `${profile.name} converter`;
   const { browser, page } = await open(profile);
@@ -406,6 +431,34 @@ async function converterChecks(profile) {
       zip.name.endsWith(".zip") && zip.bytes.subarray(0, 2).toString() === "PK",
       `${tag}: download all gives a ZIP file`,
       zip.name,
+    );
+
+    await page.getByRole("button", { name: "Clear all" }).click();
+    await page.locator('label:has([data-testid="format-webp"])').click();
+    await page.locator('[data-testid="file-input"]').setInputFiles({
+      name: "Test Deck.pdf",
+      mimeType: "application/pdf",
+      buffer: samplePdf(2),
+    });
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll(
+          '[data-testid="file-item"][data-status="done"]',
+        ).length === 2,
+    );
+    const slides = await page
+      .locator('[data-testid="html-snippet"]')
+      .allInnerTexts();
+    check(
+      slides.length === 2 &&
+        slides[0].includes('src="test-deck-01.webp"') &&
+        slides[1].includes('src="test-deck-02.webp"') &&
+        slides.every(
+          (slide) =>
+            slide.includes('width="1920"') && slide.includes('height="1080"'),
+        ),
+      `${tag}: every PDF page becomes its own image`,
+      slides.join(" | "),
     );
 
     check(

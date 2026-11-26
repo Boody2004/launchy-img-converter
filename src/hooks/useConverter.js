@@ -37,10 +37,11 @@ export function useConverter(settings) {
       list.map((item) => (item.id === id ? change(item) : item)),
     );
 
-  const addFiles = useCallback((files) => {
+  const addFiles = useCallback((files, { fromPdf = false } = {}) => {
     const added = [...files].map((file) => ({
       id: nextId++,
       file,
+      fromPdf,
       status: "queued",
       job: 0,
       alt: "",
@@ -85,7 +86,7 @@ export function useConverter(settings) {
     const next = items.find((item) => item.status === "queued");
     if (!next) return;
 
-    const { id, job, file } = next;
+    const { id, job, file, fromPdf } = next;
     const controller = new AbortController();
     const { signal } = controller;
     running.current = { id, job, controller };
@@ -104,11 +105,12 @@ export function useConverter(settings) {
           image.close();
           return;
         }
-        decoded.current.set(id, image);
+        // PDF pages are not cached: a long file would hold too much memory.
+        if (!fromPdf) decoded.current.set(id, image);
       }
-      if (signal.aborted) return;
 
       try {
+        if (signal.aborted) return;
         const result = await convert(image, settings, signal);
         update(id, (item) =>
           isCurrent(item)
@@ -122,6 +124,8 @@ export function useConverter(settings) {
             ? { ...item, status: "error", error: "convert" }
             : item,
         );
+      } finally {
+        if (fromPdf) image.close();
       }
     })().finally(() => {
       running.current = null;

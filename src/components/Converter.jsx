@@ -2,6 +2,8 @@ import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import site from "../content/site.json";
 import { useConverter } from "../hooks/useConverter.js";
+import { usePdfImport } from "../hooks/usePdfImport.js";
+import { isPdf } from "../lib/pdf.js";
 import { outputBlob, saveBlob, zipBlob } from "../lib/save.js";
 import { baseName, fill, slugify } from "../lib/text.js";
 import FileItem from "./FileItem.jsx";
@@ -10,10 +12,12 @@ import { FilePlusIcon, Spinner } from "./Icons.jsx";
 
 const t = site.converter;
 const IMAGE_EXTENSIONS = /\.(heic|heif|avif|jfif|webp|svg|ico|bmp)$/i;
-const ACCEPT = "image/*,.heic,.heif,.avif,.jfif";
+const ACCEPT = "image/*,application/pdf,.heic,.heif,.avif,.jfif,.pdf";
 
 const isImage = (file) =>
   file.type.startsWith("image/") || IMAGE_EXTENSIONS.test(file.name);
+
+const isSupported = (file) => isImage(file) || isPdf(file);
 
 const hasFiles = (event) =>
   [...(event.dataTransfer?.types ?? [])].includes("Files");
@@ -111,13 +115,19 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
   const inputId = useId();
   const { items, addFiles, removeItem, clearAll, setAlt, setFileName } =
     useConverter(convertSettings);
+  const pdf = usePdfImport(addFiles);
+  const importPdf = pdf.importPdf;
   const [dragging, setDragging] = useState(false);
   const [zipping, setZipping] = useState(false);
   const [announcement, setAnnouncement] = useState("");
 
-  const addImages = useCallback(
-    (files) => addFiles([...files].filter(isImage)),
-    [addFiles],
+  const addSupported = useCallback(
+    (files) => {
+      const list = [...files];
+      addFiles(list.filter((file) => !isPdf(file) && isImage(file)));
+      list.filter(isPdf).forEach(importPdf);
+    },
+    [addFiles, importPdf],
   );
 
   useEffect(() => {
@@ -140,13 +150,13 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
       event.preventDefault();
       depth = 0;
       setDragging(false);
-      addImages(event.dataTransfer.files);
+      addSupported(event.dataTransfer.files);
     };
     const onPaste = (event) => {
-      const files = [...(event.clipboardData?.files ?? [])].filter(isImage);
+      const files = [...(event.clipboardData?.files ?? [])].filter(isSupported);
       if (!files.length) return;
       event.preventDefault();
-      addFiles(files);
+      addSupported(files);
     };
 
     window.addEventListener("dragenter", onEnter);
@@ -161,7 +171,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
       window.removeEventListener("drop", onDrop);
       window.removeEventListener("paste", onPaste);
     };
-  }, [addFiles, addImages]);
+  }, [addSupported]);
 
   const names = useMemo(
     () => outputNames(items, convertSettings.format),
@@ -224,7 +234,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
               className="peer sr-only"
               data-testid="file-input"
               onChange={(event) => {
-                addImages(event.target.files);
+                addSupported(event.target.files);
                 event.target.value = "";
               }}
             />
@@ -236,6 +246,24 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
               {t.selectButton}
             </label>
           </div>
+          {pdf.progress && (
+            <p
+              className="flex items-center justify-center gap-2 px-6 pb-5 text-center text-sm text-brand-300"
+              data-testid="pdf-progress"
+            >
+              <Spinner className="size-4 shrink-0" />
+              {pdf.progress.total
+                ? fill(t.pdfProgress, pdf.progress)
+                : fill(t.pdfOpening, pdf.progress)}
+            </p>
+          )}
+          {pdf.errors.length > 0 && (
+            <div role="alert" className="px-6 pb-5 text-center text-sm font-medium text-brand-100">
+              {pdf.errors.map((error) => (
+                <p key={error.id}>{fill(t[error.key], { name: error.name })}</p>
+              ))}
+            </div>
+          )}
           <Settings settings={settings} onChange={onSettingsChange} />
         </div>
       </section>
@@ -268,7 +296,10 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
               </button>
               <button
                 type="button"
-                onClick={clearAll}
+                onClick={() => {
+                  pdf.cancel();
+                  clearAll();
+                }}
                 className="inline-flex min-h-11 items-center rounded-full border border-white/15 px-5 text-sm font-semibold text-ink-200 transition-colors hover:bg-white/5 hover:text-white"
               >
                 {t.clearAll}

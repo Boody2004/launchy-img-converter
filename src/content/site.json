@@ -15,10 +15,10 @@
     "homeLabel": "Launchy Image Converter home"
   },
   "converter": {
-    "dropTitle": "Drop your images here",
-    "dropText": "Select, drop or paste your images. They are converted on your device and never uploaded.",
-    "selectButton": "Select images",
-    "dropActive": "Release to add your images",
+    "dropTitle": "Drop images or a PDF",
+    "dropText": "Select, drop or paste your files. Each PDF page or slide becomes an image. Nothing leaves your device.",
+    "selectButton": "Select files",
+    "dropActive": "Release to add your files",
     "formatLabel": "Convert to",
     "formats": {
       "webp": {
@@ -38,9 +38,14 @@
     "downloadAll": "Download all (.zip)",
     "zipping": "Preparing ZIP…",
     "clearAll": "Clear all",
-    "zipName": "launchy-images.zip"
+    "zipName": "launchy-images.zip",
+    "pdfOpening": "Opening {name}…",
+    "pdfProgress": "Reading {name}: page {page} of {total}",
+    "pdfError": "{name} could not be read. The file may be damaged.",
+    "pdfLocked": "{name} is password protected. Remove the password and try again."
   },
   "item": {
+    "fromPdf": "From PDF",
     "queued": "Waiting…",
     "converting": "Converting…",
     "saved": "{percent}% smaller",
@@ -71,7 +76,8 @@
       "GIF",
       "BMP",
       "SVG",
-      "ICO"
+      "ICO",
+      "PDF"
     ]
   },
   "notFound": {

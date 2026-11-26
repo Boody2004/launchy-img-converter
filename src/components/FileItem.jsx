@@ -115,19 +115,24 @@ function FileItem({
                 {file.name}
               </p>
               <p className="mt-1 text-sm text-ink-300">
-                {formatBytes(file.size)}
+                {item.fromPdf ? t.fromPdf : formatBytes(file.size)}
                 {result && (
                   <>
-                    {" → "}
+                    {item.fromPdf ? " · " : " → "}
                     <span className="font-medium text-white">
                       {formatBytes(result.size)}
                     </span>
-                    {` · ${result.width}×${result.height} · `}
-                    <span className={change >= 0 ? "text-brand-300" : "text-ink-300"}>
-                      {change >= 0
-                        ? fill(t.saved, { percent: change })
-                        : fill(t.bigger, { percent: -change })}
-                    </span>
+                    {` · ${result.width}×${result.height}`}
+                    {!item.fromPdf && (
+                      <>
+                        {" · "}
+                        <span className={change >= 0 ? "text-brand-300" : "text-ink-300"}>
+                          {change >= 0
+                            ? fill(t.saved, { percent: change })
+                            : fill(t.bigger, { percent: -change })}
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
               </p>

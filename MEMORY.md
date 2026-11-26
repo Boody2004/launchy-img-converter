@@ -17,12 +17,13 @@
 - oxlint for linting
 - Playwright (Chromium, WebKit) for `npm run check`
 - Vercel for hosting (`vercel.json`)
-- Converter libraries, all lazy-loaded only when needed: `heic-to` (HEIC decoding, about 3 MB, LGPL-3.0), `imagetracerjs` (SVG tracing, runs in a Web Worker), `fflate` (ZIP), `@jsquash/webp` (WebAssembly WebP encoder for browsers like Safari that can't make WebP from a canvas).
+- Converter libraries, all lazy-loaded only when needed: `pdfjs-dist` (PDF pages to images, legacy build for Safari support), `heic-to` (HEIC decoding, about 3 MB, LGPL-3.0), `imagetracerjs` (SVG tracing, runs in a Web Worker), `fflate` (ZIP), `@jsquash/webp` (WebAssembly WebP encoder for browsers like Safari that can't make WebP from a canvas).
 
 ## Decisions
 
 - Owner's choices (2026-11-23): UI in English only; SVG means real vector tracing, not a raster wrapped in SVG; the owner writes alt text by hand (no AI); features are multi-file upload with a ZIP, a quality slider (default 80) and HEIC support. Resizing was not wanted.
 - Everything runs in the browser. No backend, no uploads.
+- PDF support (owner, 2026-11-26): every page or slide becomes its own image (the whole page, not the pictures embedded inside it). Pages render at 1920 px on the long side, are named `<pdf-name>-01`, `-02`, and then behave like any uploaded image. Their cards say "From PDF" with no size comparison, and their bitmaps are not cached, to save memory. `plugins/pdf-assets.js` copies the PDF.js fonts, CMaps, WASM and ICC files to `/pdfjs/`.
 - WebP is the default format. Format and quality/colors are global settings; changing them re-converts every image (debounced 300 ms).
 - File name = slug of the custom file name, else of the alt text, else of the original name. Duplicates get `-2`, `-3`. Slugs keep Unicode letters, so Arabic alt text gives Arabic file names.
 - Each image shows a copy-ready `<img>` tag with alt, width, height, `loading="lazy"`, `decoding="async"`. SVG files get the alt text as `<title>` and `role="img"`. The ZIP includes `alt-text.json` (file, alt, width, height).
@@ -41,6 +42,7 @@
 
 - Run `npm run check` in the terminal (new converter checks included).
 - Test with a real iPhone HEIC photo.
+- Test with a real slide-deck PDF (including an Arabic one).
 - Add a real 1200x630 share image at `public/og.jpg`.
 - Connect the domain on Vercel and add env variables.
 - Verify the site in Google Search Console and submit the sitemap (or set it to noindex if the tool should stay private).

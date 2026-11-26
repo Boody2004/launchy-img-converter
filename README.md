@@ -1,6 +1,6 @@
 # launchy-img-converter
 
-Launchy Image Converter is Launchy's internal tool for turning JPG, PNG, HEIC and other images into WebP files (the default) or traced SVG vectors, with SEO alt text, clean file names and copy-ready `<img>` HTML. Everything runs in the browser; no image is uploaded. Live at https://launchy-img-converter.vercel.app.
+Launchy Image Converter is Launchy's internal tool for turning JPG, PNG, HEIC and other images into WebP files (the default) or traced SVG vectors (every PDF page or slide becomes its own image), with SEO alt text, clean file names and copy-ready `<img>` HTML. Everything runs in the browser; no image is uploaded. Live at https://launchy-img-converter.vercel.app.
 
 Built with Vite, React, Tailwind CSS, Framer Motion and React Router.
 
@@ -26,7 +26,7 @@ npm run verify     # lint, then check
 
 ## Testing with `npm run check`
 
-`npm run check` builds the site into `dist-check` and tests it in real browsers: Chromium desktop, Chromium phone and WebKit as an iPhone 14. It covers static files, head tags, accessibility basics, images, console errors, the 404 page, and the converter itself (PNG to WebP, alt text to file name and HTML, SVG tracing, ZIP download) in every browser.
+`npm run check` builds the site into `dist-check` and tests it in real browsers: Chromium desktop, Chromium phone and WebKit as an iPhone 14. It covers static files, head tags, accessibility basics, images, console errors, the 404 page, and the converter itself (PNG to WebP, alt text to file name and HTML, SVG tracing, ZIP download, PDF pages to images) in every browser.
 
 `npm run check -- https://launchy-img-converter.vercel.app` tests the live site instead.
 
