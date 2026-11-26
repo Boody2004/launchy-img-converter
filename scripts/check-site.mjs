@@ -540,6 +540,56 @@ async function converterChecks(profile) {
       `${tag}: transparent background clears the background and keeps the design`,
       alphas.join(", "),
     );
+    await page.locator('[data-testid="transparent"]').uncheck();
+
+    const finished = async (name, mimeType, buffer) => {
+      await page.getByRole("button", { name: "Clear all" }).click();
+      await page
+        .locator('[data-testid="file-input"]')
+        .setInputFiles({ name, mimeType, buffer });
+      await item.and(page.locator('[data-status="done"], [data-status="error"]')).waitFor();
+      return {
+        status: await item.getAttribute("data-status"),
+        text: await item.innerText(),
+      };
+    };
+
+    const unsized = await finished(
+      "Mark.svg",
+      "image/svg+xml",
+      Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50"><rect width="200" height="50" fill="#1a8cff"/></svg>',
+      ),
+    );
+    check(
+      unsized.status === "done" &&
+        unsized.text.includes('width="1920" height="480"'),
+      `${tag}: an SVG with only a viewBox is converted at a large size`,
+      unsized.text,
+    );
+
+    const clear = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 40;
+      canvas.height = 30;
+      canvas.getContext("2d");
+      return canvas.toDataURL("image/png").split(",")[1];
+    });
+    // Stands in for a browser that fails to decode a file and "loads" it blank.
+    await page.evaluate(() => {
+      window.realCreateImageBitmap = window.createImageBitmap;
+      window.createImageBitmap = () => Promise.reject(new Error("test"));
+    });
+    const blank = await finished("Blank.avif", "image/png", Buffer.from(clear, "base64"));
+    const drawn = await finished("Drawn.png", "image/png", Buffer.from(png, "base64"));
+    await page.evaluate(() => {
+      window.createImageBitmap = window.realCreateImageBitmap;
+    });
+    check(
+      blank.status === "error" && drawn.status === "done",
+      `${tag}: a file that only loads as a blank picture shows an error`,
+      `blank ${blank.status}, drawn ${drawn.status}`,
+    );
 
     check(
       problems.length === 0,
