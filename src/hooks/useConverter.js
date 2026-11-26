@@ -15,7 +15,7 @@ async function convert(image, vector, settings, signal) {
   if (settings.format === "svg") {
     const svg = vector
       ? { ...buildVector(vector, settings), source: "vector" }
-      : { ...(await traceSvg(image, settings, signal)), source: "trace" };
+      : await traceSvg(image, settings, signal);
     return { format: "svg", ...svg, size: new Blob([svg.body]).size };
   }
   const encoded = await toWebp(image, settings);

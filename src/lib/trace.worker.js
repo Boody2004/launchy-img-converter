@@ -1,7 +1,7 @@
 import ImageTracer from "imagetracerjs";
+import { traceLogo } from "./logo-trace.js";
 
-self.onmessage = (event) => {
-  const { width, height, data, colors, scale } = event.data;
+function tracePicture({ width, height, data, colors, scale }) {
   const options = ImageTracer.checkoptions({
     numberofcolors: colors,
     colorquantcycles: 3,
@@ -24,5 +24,18 @@ self.onmessage = (event) => {
     });
   });
 
-  self.postMessage(body.replace(/ opacity="1"/g, "").replace(/ +"/g, '"'));
+  return body.replace(/ opacity="1"/g, "").replace(/ +"/g, '"');
+}
+
+self.onmessage = (event) => {
+  const message = event.data;
+  if (message.palette) {
+    try {
+      self.postMessage({ logo: traceLogo(message, message.palette, message.scale) });
+    } catch {
+      self.postMessage({ logo: null });
+    }
+    return;
+  }
+  self.postMessage({ body: tracePicture(message) });
 };

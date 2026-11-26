@@ -591,6 +591,68 @@ async function converterChecks(profile) {
       `blank ${blank.status}, drawn ${drawn.status}`,
     );
 
+    const [logoPng, noisePng] = await page.evaluate(() => {
+      const logo = document.createElement("canvas");
+      logo.width = 600;
+      logo.height = 300;
+      const context = logo.getContext("2d");
+      context.fillStyle = "#2aa9e0";
+      context.fillRect(50, 50, 400, 150);
+      context.fillStyle = "#0b50a1";
+      context.fillRect(120, 220, 300, 40);
+      context.fillStyle = "#f69620";
+      context.beginPath();
+      context.arc(500, 80, 22, 0, Math.PI * 2);
+      context.fill();
+
+      const noise = document.createElement("canvas");
+      noise.width = 200;
+      noise.height = 150;
+      const noiseContext = noise.getContext("2d");
+      const pixels = noiseContext.createImageData(200, 150);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        pixels.data[i] = (i * 7) % 256;
+        pixels.data[i + 1] = (i * 13) % 256;
+        pixels.data[i + 2] = (i * 29) % 256;
+        pixels.data[i + 3] = 255;
+      }
+      noiseContext.putImageData(pixels, 0, 0);
+      return [logo, noise].map((canvas) => canvas.toDataURL("image/png").split(",")[1]);
+    });
+    await page.locator('label:has([data-testid="format-svg"])').click();
+    await page.waitForTimeout(600);
+    const tracedSvg = async (name, base64) => {
+      await finished(name, "image/png", Buffer.from(base64, "base64"));
+      const file = await save(item.getByRole("button", { name: "Download" }));
+      return {
+        source: await item
+          .locator('[data-testid="svg-source"]')
+          .getAttribute("data-source"),
+        text: file.bytes.toString("utf8"),
+      };
+    };
+
+    const logoSvg = await tracedSvg("Logo.png", logoPng);
+    const logoWidth = Number(logoSvg.text.match(/ width="(\d+)"/)?.[1]);
+    check(
+      logoSvg.source === "logo" &&
+        ["#2aa9e0", "#0b50a1", "#f69620"].every((color) =>
+          logoSvg.text.includes(`fill="${color}"`),
+        ) &&
+        logoWidth >= 465 &&
+        logoWidth <= 480,
+      `${tag}: a flat-colour logo keeps every colour, even a small one, and is cropped to the artwork`,
+      `${logoSvg.source} ${logoSvg.text.slice(0, 200)}`,
+    );
+
+    const noiseSvg = await tracedSvg("Noise.png", noisePng);
+    check(
+      noiseSvg.source === "trace" && noiseSvg.text.includes("<path"),
+      `${tag}: an image with many colours is traced as a picture`,
+      `${noiseSvg.source} ${noiseSvg.text.slice(0, 120)}`,
+    );
+    await page.locator('label:has([data-testid="format-webp"])').click();
+
     check(
       problems.length === 0,
       `${tag}: no errors in the console while converting`,

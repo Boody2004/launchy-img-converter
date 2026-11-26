@@ -1,8 +1,11 @@
 import { removeBackground } from "./background.js";
+import { findLogoPalette } from "./logo-trace.js";
 
 const MAX_PIXELS = 16_777_216;
 const MAX_SIDE = 16_383;
 const TRACE_MAX_SIDE = 1000;
+const LOGO_MAX_SIDE = 3000;
+const LOGO_MAX_COLORS = 12;
 
 export function outputSize(width, height) {
   const scale = Math.min(
@@ -78,13 +81,8 @@ export async function toWebp(decoded, { quality, transparent, enclosed }) {
   }
 }
 
-export async function traceSvg(
-  decoded,
-  { colors, transparent, enclosed },
-  signal,
-) {
-  const { width, height } = outputSize(decoded.width, decoded.height);
-  const scale = Math.min(1, TRACE_MAX_SIDE / Math.max(width, height));
+function traceInput(decoded, width, height, maxSide, { transparent, enclosed }) {
+  const scale = Math.min(1, maxSide / Math.max(width, height));
   const traceWidth = Math.max(1, Math.round(width * scale));
   const traceHeight = Math.max(1, Math.round(height * scale));
   const { canvas, context } = drawToCanvas(
@@ -97,30 +95,55 @@ export async function traceSvg(
   const background = transparent
     ? removeBackground(imageData, { enclosed })
     : null;
+  return { imageData, scale: width / traceWidth, background };
+}
 
+function runTrace(message, signal) {
   const worker = new Worker(new URL("./trace.worker.js", import.meta.url), {
     type: "module",
   });
-  try {
-    const body = await new Promise((resolve, reject) => {
-      signal?.addEventListener("abort", () => reject(new Error("aborted")));
-      worker.onmessage = (event) => resolve(event.data);
-      worker.onerror = () => reject(new Error("trace"));
-      worker.postMessage(
-        {
-          width: traceWidth,
-          height: traceHeight,
-          data: imageData.data,
-          colors,
-          scale: width / traceWidth,
-        },
-        [imageData.data.buffer],
-      );
-    });
-    return { body, width, height, background };
-  } finally {
-    worker.terminate();
+  return new Promise((resolve, reject) => {
+    signal?.addEventListener("abort", () => reject(new Error("aborted")));
+    worker.onmessage = (event) => resolve(event.data);
+    worker.onerror = () => reject(new Error("trace"));
+    worker.postMessage(message, [message.data.buffer]);
+  }).finally(() => worker.terminate());
+}
+
+const message = ({ imageData, scale }, extra) => ({
+  width: imageData.width,
+  height: imageData.height,
+  data: imageData.data,
+  scale,
+  ...extra,
+});
+
+export async function traceSvg(decoded, settings, signal) {
+  const { width, height } = outputSize(decoded.width, decoded.height);
+  const small = traceInput(decoded, width, height, TRACE_MAX_SIDE, settings);
+  const palette = findLogoPalette(
+    small.imageData,
+    Math.min(settings.colors, LOGO_MAX_COLORS),
+  );
+
+  if (palette) {
+    const large = traceInput(decoded, width, height, LOGO_MAX_SIDE, settings);
+    const { logo } = await runTrace(message(large, { palette }), signal);
+    if (logo) {
+      return {
+        ...logo,
+        background: large.background,
+        source: "logo",
+        colors: palette.length,
+      };
+    }
   }
+
+  const { body } = await runTrace(
+    message(small, { colors: settings.colors }),
+    signal,
+  );
+  return { body, width, height, background: small.background, source: "trace" };
 }
 
 export function svgDocument({
