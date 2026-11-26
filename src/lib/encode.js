@@ -1,3 +1,5 @@
+import { removeBackground } from "./background.js";
+
 const MAX_PIXELS = 16_777_216;
 const MAX_SIDE = 16_383;
 const TRACE_MAX_SIDE = 1000;
@@ -24,6 +26,13 @@ function drawToCanvas(source, width, height) {
   return { canvas, context };
 }
 
+function clearBackground(context, width, height, options) {
+  const imageData = context.getImageData(0, 0, width, height);
+  const background = removeBackground(imageData, options);
+  if (background === "removed") context.putImageData(imageData, 0, 0);
+  return background;
+}
+
 const release = (canvas) => {
   canvas.width = 0;
   canvas.height = 0;
@@ -45,25 +54,35 @@ async function canEncodeWebp() {
   return nativeWebp;
 }
 
-export async function toWebp(decoded, quality) {
+export async function toWebp(decoded, { quality, transparent, enclosed }) {
   const { width, height } = outputSize(decoded.width, decoded.height);
   const { canvas, context } = drawToCanvas(decoded.source, width, height);
   try {
+    const background = transparent
+      ? clearBackground(context, width, height, { enclosed })
+      : null;
     if (await canEncodeWebp()) {
       const blob = await canvasToBlob(canvas, "image/webp", quality / 100);
-      if (blob?.type === "image/webp") return { blob, width, height };
+      if (blob?.type === "image/webp") {
+        return { blob, width, height, background };
+      }
     }
     const { default: encode } = await import("@jsquash/webp/encode.js");
     const buffer = await encode(context.getImageData(0, 0, width, height), {
       quality,
     });
-    return { blob: new Blob([buffer], { type: "image/webp" }), width, height };
+    const blob = new Blob([buffer], { type: "image/webp" });
+    return { blob, width, height, background };
   } finally {
     release(canvas);
   }
 }
 
-export async function traceSvg(decoded, colors, signal) {
+export async function traceSvg(
+  decoded,
+  { colors, transparent, enclosed },
+  signal,
+) {
   const { width, height } = outputSize(decoded.width, decoded.height);
   const scale = Math.min(1, TRACE_MAX_SIDE / Math.max(width, height));
   const traceWidth = Math.max(1, Math.round(width * scale));
@@ -75,6 +94,9 @@ export async function traceSvg(decoded, colors, signal) {
   );
   const imageData = context.getImageData(0, 0, traceWidth, traceHeight);
   release(canvas);
+  const background = transparent
+    ? removeBackground(imageData, { enclosed })
+    : null;
 
   const worker = new Worker(new URL("./trace.worker.js", import.meta.url), {
     type: "module",
@@ -95,7 +117,7 @@ export async function traceSvg(decoded, colors, signal) {
         [imageData.data.buffer],
       );
     });
-    return { body, width, height };
+    return { body, width, height, background };
   } finally {
     worker.terminate();
   }

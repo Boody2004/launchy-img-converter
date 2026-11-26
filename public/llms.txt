@@ -4,4 +4,4 @@
 
 ## Pages
 
-- [Home](https://launchy-img-converter.vercel.app/): Upload images or a PDF, pick WebP or SVG, set quality, add alt text, then download each file or all of them as a ZIP.
+- [Home](https://launchy-img-converter.vercel.app/): Upload images or a PDF, pick WebP or SVG, set quality, remove solid backgrounds, name all files at once, add alt text, then download each file or all of them as a ZIP.

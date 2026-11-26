@@ -22,13 +22,16 @@ const isSupported = (file) => isImage(file) || isPdf(file);
 const hasFiles = (event) =>
   [...(event.dataTransfer?.types ?? [])].includes("Files");
 
-function outputNames(items, fallbackFormat) {
+function outputNames(items, fallbackFormat, batchName) {
   const used = new Set();
   const names = new Map();
-  for (const item of items) {
+  const batch = slugify(batchName).slice(0, 60);
+  const digits = Math.max(2, String(items.length).length);
+  for (const [index, item] of items.entries()) {
     const extension = item.result?.format ?? fallbackFormat;
     const base =
       slugify(item.fileName) ||
+      (batch && `${batch}-${String(index + 1).padStart(digits, "0")}`) ||
       slugify(item.alt) ||
       slugify(baseName(item.file.name)) ||
       "image";
@@ -38,6 +41,28 @@ function outputNames(items, fallbackFormat) {
     names.set(item.id, name);
   }
   return names;
+}
+
+function Toggle({ label, hint, checked, onChange, testId }) {
+  const id = useId();
+  return (
+    <div>
+      <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium text-ink-200">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          aria-describedby={`${id}-hint`}
+          className="size-5 shrink-0 cursor-pointer accent-brand-500"
+          data-testid={testId}
+        />
+        {label}
+      </label>
+      <p id={`${id}-hint`} className="text-xs text-ink-300">
+        {hint}
+      </p>
+    </div>
+  );
 }
 
 function Settings({ settings, onChange }) {
@@ -107,6 +132,23 @@ function Settings({ settings, onChange }) {
           className="mt-3 h-11 w-full cursor-pointer"
         />
       </div>
+
+      <Toggle
+        label={t.transparentLabel}
+        hint={t.transparentHint}
+        checked={settings.transparent}
+        onChange={(transparent) => onChange({ ...settings, transparent })}
+        testId="transparent"
+      />
+      {settings.transparent && (
+        <Toggle
+          label={t.enclosedLabel}
+          hint={t.enclosedHint}
+          checked={settings.enclosed}
+          onChange={(enclosed) => onChange({ ...settings, enclosed })}
+          testId="enclosed"
+        />
+      )}
     </div>
   );
 }
@@ -119,6 +161,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
   const importPdf = pdf.importPdf;
   const [dragging, setDragging] = useState(false);
   const [zipping, setZipping] = useState(false);
+  const [batchName, setBatchName] = useState("");
   const [announcement, setAnnouncement] = useState("");
 
   const addSupported = useCallback(
@@ -174,8 +217,8 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
   }, [addSupported]);
 
   const names = useMemo(
-    () => outputNames(items, convertSettings.format),
-    [items, convertSettings.format],
+    () => outputNames(items, convertSettings.format, batchName),
+    [items, convertSettings.format, batchName],
   );
   const ready = items.filter((item) => item.result);
   const activeId = items.find((item) => item.status === "queued")?.id;
@@ -298,6 +341,7 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
                 type="button"
                 onClick={() => {
                   pdf.cancel();
+                  setBatchName("");
                   clearAll();
                 }}
                 className="inline-flex min-h-11 items-center rounded-full border border-white/15 px-5 text-sm font-semibold text-ink-200 transition-colors hover:bg-white/5 hover:text-white"
@@ -306,6 +350,31 @@ export default function Converter({ settings, convertSettings, onSettingsChange 
               </button>
             </div>
           </div>
+          {(items.length > 1 || batchName) && (
+            <div className="glass mt-5 rounded-3xl p-4 sm:px-6">
+              <label
+                htmlFor={`${inputId}-batch`}
+                className="text-sm font-medium text-ink-200"
+              >
+                {t.batchLabel}
+              </label>
+              <input
+                id={`${inputId}-batch`}
+                type="text"
+                value={batchName}
+                onChange={(event) => setBatchName(event.target.value)}
+                placeholder={t.batchPlaceholder}
+                aria-describedby={`${inputId}-batch-hint`}
+                spellCheck="false"
+                autoCapitalize="none"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-[15px] text-white placeholder:text-ink-300/70 focus:border-brand-400 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-brand-400/40"
+                data-testid="batch-name-input"
+              />
+              <p id={`${inputId}-batch-hint`} className="mt-1.5 text-xs text-ink-300">
+                {t.batchHint}
+              </p>
+            </div>
+          )}
           <ul className="mt-5 space-y-4">
             <AnimatePresence initial={false}>
               {items.map((item) => (

@@ -461,6 +461,46 @@ async function converterChecks(profile) {
       slides.join(" | "),
     );
 
+    await page.locator('[data-testid="batch-name-input"]').fill("Hotel Logo");
+    const named = await page
+      .locator('[data-testid="html-snippet"]')
+      .allInnerTexts();
+    check(
+      named[0].includes('src="hotel-logo-01.webp"') &&
+        named[1].includes('src="hotel-logo-02.webp"'),
+      `${tag}: one name for all images numbers each file`,
+      named.join(" | "),
+    );
+
+    await page.getByRole("button", { name: "Clear all" }).click();
+    await page.locator('[data-testid="transparent"]').check();
+    await page.waitForTimeout(600);
+    await page.locator('[data-testid="file-input"]').setInputFiles({
+      name: "Logo.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(png, "base64"),
+    });
+    await item.locator('[data-testid="html-snippet"]').waitFor();
+    const cutOut = await save(item.getByRole("button", { name: "Download" }));
+    const alphas = await page.evaluate(async (data) => {
+      const response = await fetch(`data:image/webp;base64,${data}`);
+      const bitmap = await createImageBitmap(await response.blob());
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const context = canvas.getContext("2d");
+      context.drawImage(bitmap, 0, 0);
+      return [
+        context.getImageData(5, 5, 1, 1).data[3],
+        context.getImageData(100, 100, 1, 1).data[3],
+      ];
+    }, cutOut.bytes.toString("base64"));
+    check(
+      alphas[0] === 0 && alphas[1] === 255,
+      `${tag}: transparent background clears the background and keeps the design`,
+      alphas.join(", "),
+    );
+
     check(
       problems.length === 0,
       `${tag}: no errors in the console while converting`,

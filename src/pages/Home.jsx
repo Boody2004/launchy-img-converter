@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import Converter from "../components/Converter.jsx";
 import site from "../content/site.json";
 
-const DEFAULT_SETTINGS = { format: "webp", quality: 80, colors: 16 };
+const DEFAULT_SETTINGS = {
+  format: "webp",
+  quality: 80,
+  colors: 16,
+  transparent: false,
+  enclosed: true,
+};
 
 function useDebounced(value, delay) {
   const [debounced, setDebounced] = useState(value);

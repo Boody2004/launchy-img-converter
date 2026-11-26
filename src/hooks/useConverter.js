@@ -12,10 +12,10 @@ const requeue = (item) =>
 
 async function convert(image, settings, signal) {
   if (settings.format === "svg") {
-    const traced = await traceSvg(image, settings.colors, signal);
+    const traced = await traceSvg(image, settings, signal);
     return { format: "svg", ...traced, size: new Blob([traced.body]).size };
   }
-  const encoded = await toWebp(image, settings.quality);
+  const encoded = await toWebp(image, settings);
   return { format: "webp", ...encoded, size: encoded.blob.size };
 }
 
@@ -24,7 +24,13 @@ export function useConverter(settings) {
   const [tick, setTick] = useState(0);
   const decoded = useRef(new Map());
   const running = useRef(null);
-  const settingsKey = `${settings.format}-${settings.quality}-${settings.colors}`;
+  const settingsKey = [
+    settings.format,
+    settings.quality,
+    settings.colors,
+    settings.transparent,
+    settings.enclosed,
+  ].join("-");
   const [appliedKey, setAppliedKey] = useState(settingsKey);
 
   if (appliedKey !== settingsKey) {

@@ -136,6 +136,9 @@ function FileItem({
                   </>
                 )}
               </p>
+              {!busy && result?.background === "kept" && (
+                <p className="mt-1 text-sm text-brand-300">{t.backgroundKept}</p>
+              )}
               {statusText && (
                 <p className="mt-1 text-sm text-brand-300">{statusText}</p>
               )}

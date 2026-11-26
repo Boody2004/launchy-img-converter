@@ -16,7 +16,8 @@ self.onmessage = (event) => {
 
   let body = "";
   traced.layers.forEach((layer, layerIndex) => {
-    if (traced.palette[layerIndex].a === 0) return;
+    // Nearly invisible layers come from the edges of transparent areas.
+    if (traced.palette[layerIndex].a < 16) return;
     layer.forEach((path, pathIndex) => {
       if (path.isholepath) return;
       body += ImageTracer.svgpathstring(traced, layerIndex, pathIndex, options);
